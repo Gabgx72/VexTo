@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vexto - Análise</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='Vexto_Logo.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="splash-screen">
+        <div class="splash-content">
+            <img src="{{ url_for('static', filename='Vexto_Logo.png') }}" alt="VexTo Logo" class="splash-logo">
+            <h1 class="splash-nome">Vex<span>To</span></h1>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="logo-sidebar" style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px;">
+            <img src="{{ url_for('static', filename='Vexto_Logo.png') }}" alt="Vexto" width="40">
+            <h2 style="color: white; margin: 0;">VexTo</h2>
+        </div>
+        <a href="/">🏠 Início</a>
+        <a href="/graficos" class="active">📊 Gráficos</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h1>Análise Detalhada</h1>
+                <form method="GET">
+                    <input type="month" name="mes" value="{{ mes_selecionado }}" onchange="this.form.submit()" style="width: auto;">
+                </form>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>🍕 Gastos por Categoria</h3>
+                    <div style="height:300px;"><canvas id="graficoPizzaPagina"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3>📈 Histórico Mensal</h3>
+                    <div style="height:300px;"><canvas id="graficoBarraPagina"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <h3>🎯 Metas Ativas</h3>
+                    <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
+                        {% for m in metas %}
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;">{{ m.categoria }}</td>
+                            <td style="text-align: right;"><strong>R$ {{ "%.2f"|format(m.valor_limite) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script id="dados-pizza" type="application/json">{{ dados_pizza|safe }}</script>
+    <script id="dados-anual" type="application/json">{{ dados_anual|safe }}</script>
+    <script src="{{ url_for('static', filename='Script.js') }}"></script>
+</body>
+</html>
