@@ -6,7 +6,19 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 app = Flask(__name__)
-app.name = "Vexto"
+
+def iniciar_banco():
+    caminho = os.path.join(os.path.dirname(__file__), 'database.db')
+
+    if not os.path.exists(caminho):
+        conn = sqlite3.connect(caminho)
+        conn.execute('''CREATE TABLE IF NOT EXISTS gastos 
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, valor REAL, categoria TEXT, data TEXT)''')
+        conn.execute('''CREATE TABLE IF NOT EXISTS metas 
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, categoria TEXT, valor_limite REAL, mes TEXT)''')
+        conn.commit()
+        conn.close()
+        print("Base de dados criada com sucesso!")
 
 def get_db():
     caminho = os.path.join(os.path.dirname(__file__), 'database.db')
@@ -23,40 +35,30 @@ def index():
     
     conn = get_db()
     
-
+    # Busca meta Global
     meta_db = conn.execute("SELECT valor_limite FROM metas WHERE categoria = 'Global' AND mes = ?", (mes_selecionado,)).fetchone()
     meta_atual_existe = meta_db is not None
     meta_global_valor = meta_db['valor_limite'] if meta_atual_existe else 0
 
+    # Busca gastos do mês
     gastos = conn.execute("SELECT * FROM gastos WHERE strftime('%Y-%m', data) = ? ORDER BY data DESC", (mes_selecionado,)).fetchall()
     total_gasto = sum(g['valor'] for g in gastos)
 
-
-    metas_mes = conn.execute("SELECT * FROM metas WHERE mes = ?", (mes_selecionado,)).fetchall()
-    status_metas = []
-    for m in metas_mes:
-        if m['categoria'] != 'Global':
-            gasto_cat = conn.execute("SELECT SUM(valor) FROM gastos WHERE categoria = ? AND strftime('%Y-%m', data) = ?", (m['categoria'], mes_selecionado)).fetchone()[0] or 0
-            status_metas.append({
-                'categoria': m['categoria'],
-                'limite': m['valor_limite'],
-                'atual': gasto_cat,
-                'ultrapassou': gasto_cat > m['valor_limite']
-            })
-
-  
-    dados_grafico = {row['categoria']: row['total'] for row in conn.execute("SELECT categoria, SUM(valor) as total FROM gastos WHERE strftime('%Y-%m', data) = ? GROUP BY categoria", (mes_selecionado,)).fetchall()}
+    # Dados para o gráfico da Home (Pizza)
+    dados_pizza = {row['categoria']: row['total'] for row in conn.execute(
+        "SELECT categoria, SUM(valor) as total FROM gastos WHERE strftime('%Y-%m', data) = ? GROUP BY categoria", 
+        (mes_selecionado,)).fetchall()}
 
     conn.close()
+
     return render_template('index.html', 
                            gastos=gastos, 
                            total=total_gasto, 
-                           dados_grafico=json.dumps(dados_grafico), 
-                           status_metas=status_metas, 
-                           mes_selecionado=mes_selecionado, 
-                           meta_atual_existe=meta_atual_existe, 
-                           meta_global=meta_global_valor, 
-                           mes_atual=mes_selecionado, 
+                           mes_selecionado=mes_selecionado,
+                           meta_global=meta_global_valor,
+                           meta_atual_existe=meta_atual_existe,
+                           mes_atual=mes_real,
+                           dados_grafico=json.dumps(dados_pizza),
                            mensagem_sucesso=mensagem_sucesso)
 
 @app.route('/add', methods=['POST'])
