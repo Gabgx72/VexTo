@@ -58,11 +58,16 @@ Diferencial: Implementei um sistema de cores dinâmico que dispara pop-ups de al
 O projeto segue o padrão rigoroso de aplicações Flask:
 
 Plaintext
-├── app.py              # Lógica do servidor e rotas
-├── database.db         # Banco de dados SQLite
-├── requirements.txt    # Dependências para Deploy (Render/Heroku)
-├── static/             # Assets (CSS, JS, Imagens)
-└── templates/          # Visual (Páginas HTML)
+controle-gastos/
+│
+├── app.py
+├── database.db
+├── requirements.txt
+├── static/
+│ ├── style.css
+│ └── script.js
+└── templates/
+└── index.html
 
 📈 Resultados Obtidos
 
