@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vexto - Dashboard</title>
+    
+    <link rel="shortcut icon" href="{{ url_for('static', filename='Vexto_Logo.png') }}" type="image/png">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='Style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="splash-screen">
+        <div class="splash-content">
+            <img src="{{ url_for('static', filename='Vexto_Logo.png') }}" alt="VexTo Logo" class="splash-logo">
+            <h1 class="splash-nome">Vex<span>To</span></h1>
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    {% if not meta_atual_existe %}
+    <div id="modal-boas-vindas" class="modal-overlay">
+        <div class="card modal-content">
+            <h2 style="color: var(--primary);">🎯 Meta para {{ mes_atual }}</h2>
+            <p>Defina seu limite de gastos total para este período.</p>
+            <form action="/definir_meta" method="POST">
+                <input type="hidden" name="categoria" value="Global">
+                <input type="hidden" name="mes" value="{{ mes_atual }}">
+                <input type="number" step="0.01" name="valor_limite" placeholder="R$ 0,00" required autofocus>
+                <button type="submit" style="margin-top: 15px;">Definir e Começar</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <aside class="sidebar">
+        <div class="logo-sidebar" style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px;">
+            <img src="{{ url_for('static', filename='Vexto_Logo.png') }}" alt="Vexto" width="40">
+            <h2 style="color: white; margin: 0; font-family: 'Segoe UI', bold;">VexTo</h2>
+        </div>
+        
+        <a href="/" class="active">🏠 Início</a>
+        <a href="/graficos">📊 Gráficos</a>
+        
+        <div id="theme-toggle" class="theme-switch" style="cursor:pointer; margin-top: 20px;">🌓 Tema</div>
+
+        <div class="dropdown-limpeza" style="margin-top: auto;">
+            <button class="btn-limpar-principal" id="btnLimparMaster">
+                <span>🗑️ Limpar</span> <span class="alça-seta">▼</span>
+            </button>
+            <div class="menu-limpeza" id="menuLimpeza">
+                <a href="/limpar_mes?mes={{ mes_selecionado }}">🗓️ Limpar Mês</a>
+                <a href="/limpar_tudo" onclick="return confirm('Apagar todo o histórico?')">⚠️ Resetar Tudo</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+            <div id="container-alertas">
+                {% if mensagem_sucesso %}<div class="alerta sucesso fade-out">{{ mensagem_sucesso }}</div>{% endif %}
+                {% if meta_global > 0 and total > meta_global %}
+                    <div class="pop-up-perigo fade-out">🚨 Meta global ultrapassada!</div>
+                {% endif %}
+            </div>
+
+            <div class="forms-grid">
+                <div class="card">
+                    <h3>➕ Novo Gasto</h3>
+                    <form action="/add" method="POST">
+                        <input type="number" step="0.01" name="valor" placeholder="R$" required>
+                        <input type="text" name="categoria" placeholder="Categoria" required>
+                        <input type="date" name="data" value="{{ mes_selecionado }}-01">
+                        <button type="submit">Lançar</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>🎯 Ajustar Metas</h3>
+                    <form action="/definir_meta" method="POST">
+                        <select name="categoria">
+                            <option value="Global">Meta Total</option>
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                        </select>
+                        <input type="number" step="0.01" name="valor_limite" placeholder="Limite R$" required>
+                        <input type="month" name="mes" value="{{ mes_selecionado }}">
+                        <button type="submit">Salvar</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card filters">
+                <form method="GET">
+                    <input type="month" name="mes" value="{{ mes_selecionado }}" onchange="this.form.submit()">
+                    <span style="float: right;">Gasto: <strong>R$ {{ "%.2f"|format(total) }}</strong></span>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>📊 Distribuição de {{ mes_selecionado }}</h3>
+                <div style="height: 250px;"><canvas id="graficoPizzaHome"></canvas></div>
+            </div>
+
+            <div class="card">
+                <h3>📜 Lançamentos</h3>
+                <table style="width:100%; border-collapse: collapse;">
+                    {% for gasto in gastos %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding:10px;">{{ gasto.data }}</td>
+                        <td>{{ gasto.categoria }}</td>
+                        <td style="text-align:right">R$ {{ "%.2f"|format(gasto.valor) }}</td>
+                        <td style="text-align:center"><a href="/delete/{{ gasto.id }}" style="color:red; text-decoration:none;">✕</a></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script id="dados-grafico-json" type="application/json">{{ dados_grafico|safe }}</script>
+    <script src="{{ url_for('static', filename='Script.js') }}"></script>
+</body>
+</html>
