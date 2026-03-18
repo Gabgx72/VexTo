@@ -1,0 +1,331 @@
+:root {
+    --primary: #2d6a4f;
+    --secondary: #40916c;
+    --background: #f0f4f8;
+    --card-bg: #ffffff;
+    --text: #1b4332;
+    --sidebar-width: 260px;
+    --danger: #d90429;
+    --border: #dce1e7;
+}
+
+[data-theme="dark"] {
+    --background: #121212;
+    --card-bg: #1e1e1e;
+    --text: #e0e0e0;
+    --primary: #52b788;
+    --border: #333;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    transition: background 0.3s, color 0.3s;
+}
+
+
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--primary);
+    color: white;
+    position: fixed;
+    height: 100vh;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    padding: 12px;
+    margin: 5px 0;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background: var(--secondary);
+    color: white;
+}
+
+.theme-switch {
+    margin-top: auto;
+    padding: 15px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 40px;
+    width: 100%;
+}
+
+.container { max-width: 1100px; margin: 0 auto; }
+
+.card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.forms-grid, .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+}
+
+button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+}
+
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+.badge-fixo { background: #dbeafe; color: #1e40af; }
+.badge-variavel { background: #f3e8ff; color: #6b21a8; }
+
+.btn-delete {
+    color: var(--danger);
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.alerta { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.perigo { background: #fee2e2; color: #991b1b; }
+.atencao { background: #fef3c7; color: #92400e; }
+
+.pop-up-perigo {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ff4d4d;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 9999;
+    animation: slideIn 0.5s ease-out;
+    border-left: 8px solid #b30000;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.sucesso {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; 
+}
+
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+
+.fade-out {
+    transition: opacity 1s ease-out;
+}
+
+
+.dropdown-limpeza {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-limpar-principal {
+    width: 100%;
+    background-color: #ff8787;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.btn-limpar-principal:hover {
+    background-color: #fa5252;
+}
+
+
+.alça-seta {
+    border-left: 1px solid rgba(255,255,255,0.3);
+    padding-left: 10px;
+    margin-left: 10px;
+    font-size: 0.8rem;
+}
+
+/* O Menu Escondido */
+.menu-limpeza {
+    display: none; 
+    position: absolute;
+    bottom: 110%; 
+    left: 0;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.menu-limpeza a {
+    display: block;
+    padding: 12px;
+    color: #333 !important;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.menu-limpeza a:hover {
+    background-color: #f8f9fa;
+    color: var(--danger) !important;
+}
+
+
+.menu-limpeza.show {
+    display: block;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #2d6a4f; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000; 
+    transition: opacity 0.8s ease, visibility 0.8s ease; 
+    opacity: 1;
+    visibility: visible;
+}
+
+.splash-content {
+    text-align: center;
+    animation: fadeInSplash 1.2s ease;
+}
+
+.splash-logo {
+    width: 130px; 
+    margin-bottom: 25px;
+}
+
+.splash-nome {
+    color: #ffffff; 
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.splash-nome span {
+    color: #1b4332; 
+}
+
+
+.loader {
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spinLoader 1s linear infinite;
+    margin: 25px auto 0;
+}
+
+
+.hidden-splash {
+    opacity: 0;
+    visibility: hidden;
+}
+
+
+@keyframes fadeInSplash { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes spinLoader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
