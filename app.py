@@ -129,7 +129,7 @@ def graficos():
     conn = get_db()
     
 
-    dados_pizza = {row['categoria']: row['total'] for row in conn.execute("SELECT categoria, SUM(valor) as total FROM gastos WHERE strftime('%Y-%m', data) = ? GROUP BY categoria", (mes_sel,)).fetchall()}
+    ddados_pizza = {row['categoria']: row['total'] for row in conn.execute("SELECT ...", (mes_sel,)).fetchall()}}
     
 
     ano = mes_sel[:4]
