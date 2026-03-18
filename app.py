@@ -9,22 +9,30 @@ app = Flask(__name__)
 
 def iniciar_banco():
     caminho = os.path.join(os.path.dirname(__file__), 'database.db')
-
-    if not os.path.exists(caminho):
-        conn = sqlite3.connect(caminho)
-        conn.execute('''CREATE TABLE IF NOT EXISTS gastos 
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, valor REAL, categoria TEXT, data TEXT)''')
-        conn.execute('''CREATE TABLE IF NOT EXISTS metas 
-                        (id INTEGER PRIMARY KEY AUTOINCREMENT, categoria TEXT, valor_limite REAL, mes TEXT)''')
-        conn.commit()
-        conn.close()
-        print("Base de dados criada com sucesso!")
+    conn = sqlite3.connect(caminho)
+    # Criar tabela de gastos (Adicionei a coluna 'tipo' que estava faltando no seu INSERT)
+    conn.execute('''CREATE TABLE IF NOT EXISTS gastos 
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                     valor REAL, 
+                     categoria TEXT, 
+                     tipo TEXT, 
+                     data TEXT)''')
+    # Criar tabela de metas
+    conn.execute('''CREATE TABLE IF NOT EXISTS metas 
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                     categoria TEXT, 
+                     valor_limite REAL, 
+                     mes TEXT)''')
+    conn.commit()
+    conn.close()
 
 def get_db():
     caminho = os.path.join(os.path.dirname(__file__), 'database.db')
     conn = sqlite3.connect(caminho)
     conn.row_factory = sqlite3.Row
     return conn
+
+iniciar_banco()
 
 @app.route('/')
 def index():
@@ -34,26 +42,20 @@ def index():
     mensagem_sucesso = request.args.get('mensagem_sucesso')
     
     conn = get_db()
-    
-    # Busca meta Global
     meta_db = conn.execute("SELECT valor_limite FROM metas WHERE categoria = 'Global' AND mes = ?", (mes_selecionado,)).fetchone()
+    meta_global_valor = meta_db['valor_limite'] if meta_db else 0
     meta_atual_existe = meta_db is not None
-    meta_global_valor = meta_db['valor_limite'] if meta_atual_existe else 0
 
-    # Busca gastos do mês
     gastos = conn.execute("SELECT * FROM gastos WHERE strftime('%Y-%m', data) = ? ORDER BY data DESC", (mes_selecionado,)).fetchall()
     total_gasto = sum(g['valor'] for g in gastos)
 
-    # Dados para o gráfico da Home (Pizza)
     dados_pizza = {row['categoria']: row['total'] for row in conn.execute(
         "SELECT categoria, SUM(valor) as total FROM gastos WHERE strftime('%Y-%m', data) = ? GROUP BY categoria", 
         (mes_selecionado,)).fetchall()}
-
     conn.close()
 
     return render_template('index.html', 
-                           gastos=gastos, 
-                           total=total_gasto, 
+                           gastos=gastos, total=total_gasto, 
                            mes_selecionado=mes_selecionado,
                            meta_global=meta_global_valor,
                            meta_atual_existe=meta_atual_existe,
@@ -82,10 +84,9 @@ def delete(id):
         mes_v = gasto['data'][:7]
         conn.execute('DELETE FROM gastos WHERE id = ?', (id,))
         conn.commit()
-        conn.close()
-        return redirect(url_for('index', mes=mes_v))
     conn.close()
-    return redirect(url_for('index'))
+    return redirect(url_for('index', mes=mes_v if gasto else None))
+ 
 
 @app.route('/definir_meta', methods=['POST'])
 def definir_meta():
@@ -128,13 +129,14 @@ def graficos():
     mes_sel = request.args.get('mes', datetime.now().strftime('%Y-%m'))
     conn = get_db()
     
-
-    ddados_pizza = {row['categoria']: row['total'] for row in conn.execute("SELECT ...", (mes_sel,)).fetchall()}}
-    
+    dados_pizza = {row['categoria']: row['total'] for row in conn.execute(
+        "SELECT categoria, SUM(valor) as total FROM gastos WHERE strftime('%Y-%m', data) = ? GROUP BY categoria", 
+        (mes_sel,)).fetchall()}
 
     ano = mes_sel[:4]
-    dados_anual = {row['m']: row['t'] for row in conn.execute("SELECT strftime('%m', data) as m, SUM(valor) as t FROM gastos WHERE strftime('%Y', data) = ? GROUP BY m ORDER BY m ASC", (ano,)).fetchall()}
-    
+    dados_anual = {row['m']: row['t'] for row in conn.execute(
+        "SELECT strftime('%m', data) as m, SUM(valor) as t FROM gastos WHERE strftime('%Y', data) = ? GROUP BY m ORDER BY m ASC", 
+        (ano,)).fetchall()}
 
     metas = conn.execute("SELECT * FROM metas WHERE mes = ? ORDER BY (categoria='Global') DESC", (mes_sel,)).fetchall()
     conn.close()
